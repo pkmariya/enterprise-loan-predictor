@@ -1,0 +1,43 @@
+name: Deploy to GCP
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+
+  deploy:
+
+    runs-on: ubuntu-latest
+
+    steps:
+
+    - uses: actions/checkout@v4
+
+    - uses: google-github-actions/auth@v2
+      with:
+        credentials_json: ${{ secrets.GCP_SERVICE_ACCOUNT_KEY }}
+
+    - uses: google-github-actions/setup-gcloud@v2
+
+    - run: |
+        gcloud auth configure-docker us-central1-docker.pkg.dev
+
+    - run: |
+        docker build -t app .
+
+    - run: |
+        docker tag app \
+        us-central1-docker.pkg.dev/${{ secrets.GCP_PROJECT_ID }}/loan-repository/loan-predictor:${{ github.sha }}
+
+    - run: |
+        docker push \
+        us-central1-docker.pkg.dev/${{ secrets.GCP_PROJECT_ID }}/loan-repository/loan-predictor:${{ github.sha }}
+
+    - run: |
+        gcloud run deploy loan-api \
+          --image us-central1-docker.pkg.dev/${{ secrets.GCP_PROJECT_ID }}/loan-repository/loan-predictor:${{ github.sha }} \
+          --region us-central1 \
+          --platform managed \
+          --allow-unauthenticated

@@ -21,6 +21,12 @@ ENV/
 
 # Environment / secrets
 .env
+# GCP service account keys / credentials (never commit these)
+key.json
+*-key.json
+service-account*.json
+credentials*.json
+gcp-*.json
 
 # IDE
 .vscode/
