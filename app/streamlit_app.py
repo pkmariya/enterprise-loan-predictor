@@ -1,5 +1,9 @@
+import os
 import streamlit as st
 import requests
+
+# API base URL: set via env var in Cloud Run; defaults to localhost for local dev.
+API_URL = os.getenv("API_URL", "http://localhost:8000")
 
 st.title("Enterprise Loan Approval Predictor")
 
@@ -11,7 +15,7 @@ existing_loans = st.number_input("Existing Loans")
 
 if st.button("Predict Loan Approval"):
     response = requests.post(
-        "http://localhost:8000/predict",
+        f"{API_URL}/predict",
         params={
             "age": age,
             "income": income,
